@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables (API keys, passwords)
+.env
+
+# VS Code
+.vscode/
+.json
+
+# Windows
+Thumbs.db
+
+# output
+output/
