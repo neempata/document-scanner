@@ -1,123 +1,180 @@
-# Document Scanner
+# OpenCV Document Scanner
 
-A Python-based document scanner that transforms photos of documents into clean, scanned-like images with perspective correction and image enhancement.
+A computer vision application that automatically detects documents within an image, corrects perspective distortion, and produces a clean, high-contrast scanned version suitable for reading, printing, or archiving.
+
+Built with OpenCV and Python, this project demonstrates a complete document scanning pipeline using edge detection, contour analysis, perspective transformation, and adaptive image thresholding.
+
+## Project Overview
+
+Flatbed scanners produce high-quality document scans but aren't always available. This project recreates much of that functionality using only a photograph taken with a camera or smartphone.
+
+The scanner automatically identifies the document in an image, detects its boundaries, corrects perspective distortion, enhances local contrast, and generates a black-and-white scanned output that resembles a traditional document scan.
+
+The application also includes a fallback mechanism that scans the entire image when a document boundary cannot be reliably detected, making it more robust when working with difficult images or cluttered backgrounds.
 
 ## Features
 
-- **Automatic Document Detection**: Uses edge detection and contour analysis to locate documents in images
-- **Perspective Correction**: Applies 4-point perspective transformation to get a top-down view
-- **Image Enhancement**: 
-  - Converts to grayscale
-  - Applies CLAHE (Contrast Limited Adaptive Histogram Equalization) for better contrast
-  - Uses local thresholding to create a "black and white" paper effect
-- **Fallback Mode**: Handles edge cases where document detection fails by using the full image
-- **Flexible Output**: Saves processed images with "scanned_" prefix
+- Automatic document detection
+- Edge detection using Canny
+- Contour detection and polygon approximation
+- Perspective correction
+- Adaptive thresholding
+- Local contrast enhancement using CLAHE
+- Automatic output image generation
+- Graceful fallback when no document contour is detected
 
-## Requirements
+## Technologies Used
 
-- Python 3.6+
-- OpenCV (`cv2`)
+- Python
+- OpenCV
 - NumPy
-- scikit-image
+- Scikit-image
 - imutils
+
+## Image Processing Pipeline
+
+### 1. Image Loading
+
+The application loads the input image and resizes it while preserving its aspect ratio. Working on a resized image improves processing speed while maintaining the original image for the final transformation.
+
+### 2. Edge Detection
+
+The image is converted to grayscale before applying Gaussian Blur to reduce noise.
+
+Canny Edge Detection is then used to identify strong edges, followed by a dilation step that strengthens document boundaries and improves contour detection.
+
+### 3. Document Detection
+
+The largest contours in the image are analyzed and approximated as polygons.
+
+If a contour containing four vertices is found, it is assumed to represent the document.
+
+If no suitable contour is detected, the application automatically falls back to treating the entire image as the document instead of terminating with an error.
+
+### 4. Perspective Transformation
+
+Once the document corners have been identified, a perspective transformation is applied to generate a top-down view of the page.
+
+The transformation matrix is calculated using OpenCV before warping the original high-resolution image.
+
+### 5. Image Enhancement
+
+The warped image is converted to grayscale before applying:
+
+- CLAHE (Contrast Limited Adaptive Histogram Equalization)
+- Adaptive Gaussian Thresholding
+
+These techniques improve readability by increasing local contrast while producing the appearance of a scanned document.
+
+### 6. Output Generation
+
+The processed image is displayed alongside the original photograph and is automatically saved to disk with the filename:
+
+```
+scanned_<original_filename>
+```
+
+## Repository Structure
+
+```
+OpenCV-Document-Scanner/
+│
+├── scan.py
+├── transform_opencv.py
+├── README.md
+├── requirements.txt
+└── sample_images/
+```
 
 ## Installation
 
-1. Clone or download this repository:
-```bash
-cd document_scanner
-```
-
-2. Install dependencies:
-```bash
-pip install opencv-python numpy scikit-image imutils
-```
-
-## Usage
-
-Run the scanner with an image file:
+Clone the repository:
 
 ```bash
-python scan.py -i /path/to/image.jpg
+git clone https://github.com/neempata/opencv-document-scanner.git
 ```
 
-### Arguments
-
-- `-i`, `--image` (required): Path to the image file to be scanned
-
-### Example
+Install the required packages:
 
 ```bash
-python scan.py -i photos/document.jpg
+pip install -r requirements.txt
 ```
 
-The script will:
-1. Display edge detection results
-2. Show the detected document outline
-3. Display the original and scanned images side-by-side
-4. Save the final result as `scanned_document.jpg` in the current directory
+Run the application:
 
-## How It Works
-
-### Step 1: Edge Detection
-- Resizes the image to 500px height for processing
-- Converts to grayscale and applies Gaussian blur
-- Uses Canny edge detection to find edges in the image
-
-### Step 2: Contour Detection
-- Finds contours in the edge-detected image
-- Keeps the 5 largest contours and looks for a 4-point polygon
-- This polygon represents the document corners
-
-### Step 3: Perspective Transformation
-- Uses the detected corners to apply a perspective transform
-- Applies the transform to the original (full resolution) image
-- This creates a top-down view of the document
-
-### Step 4: Image Enhancement
-- Converts to grayscale
-- Applies CLAHE to improve local contrast
-- Uses local thresholding to create a clear black-and-white effect
-
-## Output
-
-The processed image is saved with the filename pattern: `scanned_<original_filename>`
-
-Example: If input is `photo.jpg`, output will be `scanned_photo.jpg`
-
-## Project Structure
-
-```
-document_scanner/
-├── scan.py                 # Main script
-├── transform_opencv.py     # Perspective transformation utilities
-├── images/                 # Sample images directory
-└── README.md              # This file
+```bash
+python scan.py --image path/to/document.jpg
 ```
 
-## Troubleshooting
+Example:
 
-### Image not found error
-- Check that the file path is correct
-- Use absolute paths or ensure the file is in the correct location
+```bash
+python scan.py --image images/receipt.jpg
+```
 
-### No 4-point contour found warning
-- This is normal for complex backgrounds
-- The script will fall back to using the entire image as the document
-- Try with a simpler background or higher contrast
+## Example Processing Pipeline
 
-### Poor results
-- Ensure good lighting in the original photo
-- Try to capture the document at a more perpendicular angle
-- Avoid busy backgrounds that may interfere with edge detection
+```
+Original Image
+       │
+       ▼
+Grayscale Conversion
+       │
+       ▼
+Gaussian Blur
+       │
+       ▼
+Canny Edge Detection
+       │
+       ▼
+Contour Detection
+       │
+       ▼
+Perspective Transformation
+       │
+       ▼
+CLAHE Contrast Enhancement
+       │
+       ▼
+Adaptive Thresholding
+       │
+       ▼
+Final Scanned Document
+```
+
+## Results
+
+The application successfully transforms photographs of documents into clean, high-contrast scanned images.
+
+The final output includes:
+
+- Corrected document perspective
+- Improved readability
+- Enhanced local contrast
+- Automatic black-and-white scan
+- Saved output image for future use
+
+The fallback detection mechanism also allows the scanner to continue processing images where document boundaries cannot be confidently identified, making the application more robust across a wider variety of inputs.
+
+## What I Learned
+
+This project gave me practical experience with the fundamental concepts behind computer vision and digital image processing. I learned how multiple image processing techniques can be combined into a complete pipeline, where each stage contributes to improving the final result.
+
+Building the scanner also strengthened my understanding of perspective transformations, contour detection, image enhancement, and the importance of designing software that can handle unexpected inputs gracefully. Rather than stopping when ideal conditions are not met, the application was designed to continue producing useful output whenever possible.
+
+## Future Improvements
+
+Some improvements I'd like to explore include:
+
+- Automatic rotation correction
+- Support for multiple documents in a single image
+- Color document enhancement
+- Shadow removal
+- OCR integration using Tesseract
+- Batch processing of multiple images
+- Desktop GUI using PyQt or Tkinter
+- Mobile-friendly interface
 
 ## License
 
-This project is provided as-is for educational purposes.
-
-## Dependencies Details
-
-- **OpenCV**: Computer vision library for image processing
-- **NumPy**: Numerical computing library
-- **scikit-image**: Image processing algorithms
-- **imutils**: OpenCV utilities and convenience functions
+This project is intended for educational and portfolio purposes.
