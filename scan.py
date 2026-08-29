@@ -3,6 +3,7 @@ from skimage.filters import threshold_local
 import numpy as np  
 import argparse
 import imutils
+import cv2
 
 # construct the arg parser and parse the arguments
 ap = argparse.ArgumentParser()
