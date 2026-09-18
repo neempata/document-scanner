@@ -14,7 +14,7 @@ args = vars(ap.parse_args())
 # load the image and compute the ratio of the old height to the new height, clone it, and resize it
 image = cv2.imread(args["image"])
 if image is None;
-	raise (f"Could not load image at '{args['image']}' - check the path")
+	raise FileNotFoundError(f"Could not load image at '{args['image']}' - check the path")
 ratio = image.shape[0] / 500.0
 orig = image.copy()
 image = imutils.resize(image, height = 500)
